@@ -7,13 +7,35 @@ document.getElementById("status").addEventListener("click", e => getStatus(e));
 // Wire up our Run Checks button
 document.getElementById("submit").addEventListener("click", e => postForm(e));
 
+
+// Process Option function
+function processOptions(form) {
+    let optArray = [];
+
+    for (let e of form.entries()) {
+        if (e[0] === "options") {
+            optArray.push(e[1]);
+        }
+    }
+
+    form.delete("options");
+
+    form.append("options", optArray.join());
+
+    return form;
+}
 // Create postForm
 async function postForm(e) {
 
-   const form = new FormData(document.getElementById("checksform"));
+    const form = processOptions(new FormData(document.getElementById("checksform")));
+//    const form = new FormData(document.getElementById("checksform"));
    // test
    // for (let e of form.entries()) {
    //    console.log(e);
+   // }
+   // test 02
+   // for (let e of form.entries()) {
+   //    console.log(entry);
    // }
    const response = await fetch(API_URL, {
        method: "POST",
@@ -33,6 +55,7 @@ async function postForm(e) {
     if (response.ok) {
         displayErrors(data);
     } else {
+        displayException(data);
         throw new Error(data.error);
     }
 
@@ -50,10 +73,23 @@ async function getStatus(e) {
       //console.log(data);  // or data.expire to see expiry date
       displayStatus(data);
    } else {
+      displayException(data);
       throw new Error(data.error);
    }
 }
 
+function displayException(data) {
+
+    let heading = `<div class="error-heading">An Exception Occurred</div>`;
+
+    results = `<div>The API returned status code ${data.status_code}</div>`;
+    results += `<div>Error number: <strong>${data.error_no}</strong></div>`;
+    results += `<div>Error text: <strong>${data.error}</strong></div>`;
+
+    document.getElementById("resultsModalTitle").innerText = heading;
+    document.getElementById("results-content").innerHTML = results;
+    resultsModal.show();
+}
 
 function displayErrors(data) {
    
@@ -86,7 +122,3 @@ function displayStatus(data) {
     document.getElementById("results-content").innerHTML = results;
     resultsModal.show();
 }
-
-
-
-
