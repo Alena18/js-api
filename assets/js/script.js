@@ -11,7 +11,10 @@ document.getElementById("submit").addEventListener("click", e => postForm(e));
 async function postForm(e) {
 
    const form = new FormData(document.getElementById("checksform"));
-
+   // test
+   // for (let e of form.entries()) {
+   //    console.log(e);
+   // }
    const response = await fetch(API_URL, {
        method: "POST",
        headers: {
@@ -19,8 +22,22 @@ async function postForm(e) {
        },
        body: form,
    });
+   // test
+   // if(response.ok) {
+      // console.log(data);
+   // } else {
+   //    throw new Error(data.error);
+   // }
+   const data = await response.json();
+
+    if (response.ok) {
+        displayErrors(data);
+    } else {
+        throw new Error(data.error);
+    }
 
 }
+
 // Create a promise
 async function getStatus(e) {
    const queryString = `${API_URL}?api_key=${API_KEY}`;
@@ -35,7 +52,30 @@ async function getStatus(e) {
    } else {
       throw new Error(data.error);
    }
-};
+}
+
+
+function displayErrors(data) {
+   
+   let results = "";
+   let heading = `JSHint Results for ${data.file}`;
+
+   if (data.total_errors === 0) {
+      results = `<div class="no_errors">No errors reported!</div>`;
+  } else {
+      results = `<div>Total Errors: <span class="error_count">${data.total_errors}</span></div>`;
+      for (let error of data.error_list) {
+          results += `<div>At line <span class="line">${error.line}</span>, `;
+          results += `column <span class="column">${error.col}:</span></div>`;
+          results += `<div class="error">${error.error}</div>`;
+      }
+  }
+
+    document.getElementById("resultsModalTitle").innerText = heading;
+    document.getElementById("results-content").innerHTML = results;
+    resultsModal.show();
+}
+
 
 function displayStatus(data) {
     let heading = "API Key Status";
@@ -46,4 +86,7 @@ function displayStatus(data) {
     document.getElementById("results-content").innerHTML = results;
     resultsModal.show();
 }
+
+
+
 
